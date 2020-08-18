@@ -28,16 +28,16 @@ export class Component {
     constructor() {
         this._root = null
         this.props = Object.create(null)
-        this.child = []
+        this.children = []
     }
 
     setAttribute(key, value) {
-        this.root.setAttribute(key, value) // 直接挂载属性
-        // this.props[key] = value // 间接挂载属性
+        // this.root.setAttribute(key, value) // 直接挂载属性
+        this.props[key] = value // 间接挂载属性
     }
     appendChild(child) {
-        this.root.appendChild(child.root)
-        // this.child.push(child)
+        // this.root.appendChild(child.root)
+        this.children.push(child)
     }
     get root() {
         if (!this._root) {
@@ -45,15 +45,11 @@ export class Component {
         }
         return this._root
     }
-
-    render() {
-        return this.render().root
-    }
 }
 
 
 export function createElement(tag, attr, ...children) {
-    let element 
+    let element
     if (typeof tag === 'string') {
         element = new ElementWrapper(tag)
     } else {
@@ -68,14 +64,18 @@ export function createElement(tag, attr, ...children) {
         }
     }
 
-    
-    children.forEach((item) => {
-        if (typeof item === 'object'){
-            element.appendChild(item)
-        }else {
-            element.appendChild(new TextWrapper(item))
-        }
-    })
+    const inserChild = (children) => {
+        children.forEach((item) => {
+            if (Array.isArray(item)) {
+                inserChild(item)
+            } else if (typeof item === 'object') {
+                element.appendChild(item)
+            } else {
+                element.appendChild(new TextWrapper(item))
+            }
+        })
+    }
+    inserChild(children)
     return element
 }
 
